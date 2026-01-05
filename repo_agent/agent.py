@@ -140,8 +140,8 @@ agent = Agent(
     tools=[fetch_recent_commits, analyze_code_changes, get_file_content]
 )
 
-# Expose as FastAPI app via A2A
-app = to_a2a(agent)
+# Expose as FastAPI app via A2A with correct host/port for agent card
+app = to_a2a(agent, host="127.0.0.1", port=8001)
 
 # For ADK Web UI discovery
 root_agent = agent

@@ -75,7 +75,7 @@ agent = Agent(
     tools=[analyze_code_quality, check_best_practices, suggest_optimizations]
 )
 
-app = to_a2a(agent)
+app = to_a2a(agent, host="127.0.0.1", port=8003)
 root_agent = agent
 
 if __name__ == "__main__":

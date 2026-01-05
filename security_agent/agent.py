@@ -95,7 +95,7 @@ agent = Agent(
     tools=[scan_for_secrets, check_sql_injection_risks, compare_cve_database, flag_insecure_patterns]
 )
 
-app = to_a2a(agent)
+app = to_a2a(agent, host="127.0.0.1", port=8002)
 root_agent = agent
 
 if __name__ == "__main__":

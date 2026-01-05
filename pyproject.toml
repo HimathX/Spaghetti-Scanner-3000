@@ -1,0 +1,14 @@
+[project]
+name = "spaghetti-scanner-3000"
+version = "0.1.0"
+description = "Developer Productivity Suite"
+authors = [{name = "Antigravity", email = "antigravity@google.com"}]
+dependencies = [
+    "google-adk[a2a]>=0.1.0",
+    "fastapi>=0.115.0",
+    "uvicorn>=0.30.0",
+    "python-dotenv>=1.0.1",
+    "PyGithub>=2.4.0",
+    "pydantic>=2.9.0"
+]
+requires-python = ">=3.13"

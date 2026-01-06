@@ -12,6 +12,15 @@ logger = logging.getLogger(__name__)
 
 load_dotenv()
 
+# Pre-compile regex patterns
+SECRET_PATTERNS = {
+    "Generic API Key": re.compile(r"(?i)(api_key|apikey|secret_key|access_token)\s*[:=]\s*['\"][a-zA-Z0-9_\-]{20,}['\"]"),
+    "AWS Access Key": re.compile(r"AKIA[0-9A-Z]{16}"),
+    "Private Key": re.compile(r"-----BEGIN PRIVATE KEY-----")
+}
+
+SQL_INJECTION_PATTERN = re.compile(r"(?i)(SELECT|INSERT|UPDATE|DELETE).*(\+|%s|\{\})")
+
 # Define tools as standalone functions
 def scan_for_secrets(code_content: str) -> List[str]:
     """
@@ -24,14 +33,9 @@ def scan_for_secrets(code_content: str) -> List[str]:
         A list of findings.
     """
     findings = []
-    patterns = {
-        "Generic API Key": r"(?i)(api_key|apikey|secret_key|access_token)\s*[:=]\s*['\"][a-zA-Z0-9_\-]{20,}['\"]",
-        "AWS Access Key": r"AKIA[0-9A-Z]{16}",
-        "Private Key": r"-----BEGIN PRIVATE KEY-----"
-    }
-
-    for name, pattern in patterns.items():
-        if re.search(pattern, code_content):
+    
+    for name, pattern in SECRET_PATTERNS.items():
+        if pattern.search(code_content):
             findings.append(f"Potential {name} found.")
     
     return findings
@@ -47,7 +51,7 @@ def check_sql_injection_risks(code_content: str) -> List[str]:
         A list of warnings.
     """
     findings = []
-    if re.search(r"(?i)(SELECT|INSERT|UPDATE|DELETE).*(\+|%s|\{\})", code_content):
+    if SQL_INJECTION_PATTERN.search(code_content):
          findings.append("Potential SQL injection risk: Detected SQL query construction using string concatenation or formatting. Use parameterized queries instead.")
     
     return findings

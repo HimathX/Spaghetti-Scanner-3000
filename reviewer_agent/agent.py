@@ -14,7 +14,7 @@ load_dotenv()
 # Define tools as standalone functions
 def analyze_code_quality(code_content: str) -> Dict[str, Any]:
     """
-    Analyzes code structure and complexity metrics.
+    Analyzes code structure and complexity metrics in a single pass.
     
     Args:
         code_content: The code to analyze.
@@ -24,10 +24,18 @@ def analyze_code_quality(code_content: str) -> Dict[str, Any]:
     """
     lines = code_content.splitlines()
     num_lines = len(lines)
-    num_functions = sum(1 for line in lines if line.strip().startswith("def ") or line.strip().startswith("function "))
     
+    num_functions = 0
     max_indent = 0
+    
     for line in lines:
+        stripped = line.strip()
+        if not stripped:
+            continue
+            
+        if stripped.startswith("def ") or stripped.startswith("function "):
+            num_functions += 1
+            
         indent = len(line) - len(line.lstrip())
         max_indent = max(max_indent, indent)
         
@@ -61,9 +69,17 @@ def suggest_optimizations(code_content: str) -> List[str]:
     suggestions = []
     lines = code_content.splitlines()
     for i, line in enumerate(lines):
-         if "for " in line and any("for " in l for l in lines[i+1:i+3] if (len(l) - len(l.lstrip())) > (len(line) - len(line.lstrip()))):
-             suggestions.append(f"Potential nested loop detected around line {i+1}. Consider optimizing O(N^2) operations.")
-             break
+         # Check for nested loops more robustly
+         stripped = line.strip()
+         if stripped.startswith("for ") or stripped.startswith("while "):
+             indent_level = len(line) - len(line.lstrip())
+             # Look ahead for immediate nested loop
+             if i + 1 < len(lines):
+                 next_line = lines[i+1]
+                 next_stripped = next_line.strip()
+                 next_indent = len(next_line) - len(next_line.lstrip())
+                 if (next_stripped.startswith("for ") or next_stripped.startswith("while ")) and next_indent > indent_level:
+                     suggestions.append(f"Potential nested loop detected around line {i+1}. Consider optimizing O(N^2) operations.")
     
     return suggestions
 

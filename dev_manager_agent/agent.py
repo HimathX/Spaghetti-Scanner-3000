@@ -80,8 +80,6 @@ agent = Agent(
        - Google API Key
     2. Ask for them one by one. Explain why you need them.
     3. Once you have ALL three, call the `deploy_application` tool.
-    
-    Always verify you have the data before reporting or deploying.
     """,
     sub_agents=[repo_service, security_service, reviewer_service],
     tools=[deploy_application]

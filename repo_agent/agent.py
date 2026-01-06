@@ -16,6 +16,31 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 
 # Define tools as standalone functions
+def _get_github_client_and_repo(repo_url_override: str = None):
+    """
+    Helper to get the GitHub client and repository object.
+    
+    Returns:
+        Tuple (repo_object, error_message)
+    """
+    github_token = os.getenv("GITHUB_TOKEN")
+    repo_url = repo_url_override or os.getenv("GITHUB_REPO_URL")
+    
+    if not github_token or not repo_url:
+        return None, "GITHUB_TOKEN or GITHUB_REPO_URL not configured"
+        
+    try:
+        github_client = Github(github_token)
+        if "github.com/" in repo_url:
+            repo_name = repo_url.split("github.com/")[1].removesuffix(".git")
+        else:
+            repo_name = repo_url
+            
+        repo = github_client.get_repo(repo_name)
+        return repo, None
+    except Exception as e:
+        return None, f"GitHub connection error: {e}"
+
 def fetch_recent_commits(limit: int = 10) -> List[Dict[str, Any]]:
     """
     Fetches the recent commits from the repository.
@@ -26,20 +51,11 @@ def fetch_recent_commits(limit: int = 10) -> List[Dict[str, Any]]:
     Returns:
         A list of dictionaries containing commit information (sha, author, message, date).
     """
-    github_token = os.getenv("GITHUB_TOKEN")
-    repo_url = os.getenv("GITHUB_REPO_URL")
-    
-    if not github_token or not repo_url:
-        return [{"error": "GITHUB_TOKEN or GITHUB_REPO_URL not configured"}]
+    repo, error = _get_github_client_and_repo()
+    if error:
+        return [{"error": error}]
     
     try:
-        github_client = Github(github_token)
-        if "github.com/" in repo_url:
-            repo_name = repo_url.split("github.com/")[1].removesuffix(".git")
-        else:
-            repo_name = repo_url
-        
-        repo = github_client.get_repo(repo_name)
         commits = list(repo.get_commits()[:limit])
         result = []
         for commit in commits:
@@ -63,20 +79,11 @@ def analyze_code_changes(commit_sha: str) -> Dict[str, Any]:
     Returns:
         A dictionary containing the files changed, additions, deletions, and the patch.
     """
-    github_token = os.getenv("GITHUB_TOKEN")
-    repo_url = os.getenv("GITHUB_REPO_URL")
-    
-    if not github_token or not repo_url:
-        return {"error": "GITHUB_TOKEN or GITHUB_REPO_URL not configured"}
+    repo, error = _get_github_client_and_repo()
+    if error:
+        return {"error": error}
     
     try:
-        github_client = Github(github_token)
-        if "github.com/" in repo_url:
-            repo_name = repo_url.split("github.com/")[1].removesuffix(".git")
-        else:
-            repo_name = repo_url
-        
-        repo = github_client.get_repo(repo_name)
         commit = repo.get_commit(commit_sha)
         files_changed = []
         for file in commit.files:
@@ -108,20 +115,11 @@ def get_file_content(file_path: str, ref: Optional[str] = None) -> str:
     Returns:
         The content of the file as a string.
     """
-    github_token = os.getenv("GITHUB_TOKEN")
-    repo_url = os.getenv("GITHUB_REPO_URL")
-    
-    if not github_token or not repo_url:
-        return "Error: GITHUB_TOKEN or GITHUB_REPO_URL not configured"
+    repo, error = _get_github_client_and_repo()
+    if error:
+        return f"Error: {error}"
     
     try:
-        github_client = Github(github_token)
-        if "github.com/" in repo_url:
-            repo_name = repo_url.split("github.com/")[1].removesuffix(".git")
-        else:
-            repo_name = repo_url
-        
-        repo = github_client.get_repo(repo_name)
         if ref:
             content_file = repo.get_contents(file_path, ref=ref)
         else:

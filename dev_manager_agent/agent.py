@@ -29,60 +29,41 @@ reviewer_service = RemoteA2aAgent(
     agent_card=f"http://127.0.0.1:8003{AGENT_CARD_WELL_KNOWN_PATH}"
 )
 
-# Define local tools
-def deploy_application(github_token: str, repo_url: str, google_api_key: str) -> str:
-    """
-    Simulates deploying the application to the cloud.
-    
-    Args:
-        github_token: The user's GitHub Personal Access Token.
-        repo_url: The full URL of the repository to deploy.
-        google_api_key: The user's Google API Key.
-        
-    Returns:
-        A status message confirming deployment.
-    """
-    # In a real app, this would use the secrets to trigger a build/deploy pipeline
-    
-    # Mask secrets for logging/output
-    masked_token = f"{github_token[:4]}...{github_token[-4:]}" if len(github_token) > 8 else "***"
-    masked_key = f"{google_api_key[:4]}...{google_api_key[-4:]}" if len(google_api_key) > 8 else "***"
-    
-    log_msg = (
-        f"Starting deployment for {repo_url}\n"
-        f"Using GitHub Token: {masked_token}\n"
-        f"Using Google API Key: {masked_key}"
-    )
-    logger.info(log_msg)
-    
-    return f"Deployment started successfully for {repo_url}! (Simulation)"
-
 # Initialize the agent
 agent = Agent(
     name="dev_manager",
-    model="gemini-2.0-flash-exp",
-    instruction="""You are the Dev Manager. Your goal is to generate a 'Sprint Status Report' OR help deploy the application.
+    model="gemini-2.0-flash",
+    instruction="""You are the Dev Manager, an AI assistant for software development.
     
-    You have access to a team of agents:
-    1. 'repo_agent': Fetches commits and code.
-    2. 'security_agent': Scans for vulnerabilities.
-    3. 'reviewer_agent': Reviews code quality.
+    Your capabilities:
+    1. **Activity Summary**: Generate a comprehensive report on recent changes (commits), analyzing them for security and quality.
+    2. **Interactive Assistance**: Answer questions about the codebase, specific commits, or file contents.
     
-    Workflow for Status Reports:
-    1. Ask 'repo_agent' for the last few commits (e.g., 5).
-    2. For each commit, get the analysis from 'security_agent' and 'reviewer_agent'.
-    3. Consolidate all findings into a Markdown report.
+    You have a team of sub-agents:
+    - 'repo_agent': Fetches commits, file contents, and diffs.
+    - 'security_agent': Scans code for vulnerabilities.
+    - 'reviewer_agent': Reviews code for quality and best practices.
     
-    Workflow for Deployment:
-    1. If the user asks to "deploy", you MUST collect the following secrets from them via chat if not provided:
-       - GitHub Token
-       - Repository URL
-       - Google API Key
-    2. Ask for them one by one. Explain why you need them.
-    3. Once you have ALL three, call the `deploy_application` tool.
+    **Workflows:**
+    
+    **1. Activity Summary (Trigger: "What's new?", "Summarize recent changes", "Report"):**
+       - **STEP 1**: Call 'repo_agent' to get the list of recent commits.
+       - **STEP 2**: For each interesting commit in that list, call 'repo_agent' AGAIN to get the diff/changes.
+       - **STEP 3**: ONLY ONCE YOU HAVE THE CODE CONTENT, send that content to 'security_agent' and 'reviewer_agent' for analysis.
+       - **STEP 4**: Consolidate into a summary.
+
+    **2. Code Review / Interactive Queries:**
+       - **STEP 1**: If the user asks for a review of a specific commit or "the last commit", YOU MUST FIRST call 'repo_agent' to get the diff/content of that commit.
+       - **STEP 2**: WAIT for the code content to be returned by 'repo_agent'.
+       - **STEP 3**: Send the *actual code content* you received to 'reviewer_agent' and 'security_agent'. **DO NOT** call them empty-handed.
+       - **STEP 4**: Present the results clearly.
+       
+    **Important:**
+    - If a user asks "Give me a code review" without context, assume they mean the *last commit* or ask for clarification, but PREFER to assume last commit if you recently discussed it.
+    - Always output text based on the tools' responses. Do not return empty responses.
     """,
     sub_agents=[repo_service, security_service, reviewer_service],
-    tools=[deploy_application]
+    tools=[]
 )
 
 app = to_a2a(agent)

@@ -133,7 +133,7 @@ def get_file_content(file_path: str, ref: Optional[str] = None) -> str:
 # Initialize the agent
 agent = Agent(
     name="repo_agent",
-    model="gemini-2.0-flash-exp",
+    model="gemini-2.0-flash",
     instruction="You are a Repository Agent. Your job is to fetch data from GitHub repositories. You have access to tools to fetch commits, file contents, and analyze changes. Use them to answer queries about the codebase history and content.",
     tools=[fetch_recent_commits, analyze_code_changes, get_file_content]
 )

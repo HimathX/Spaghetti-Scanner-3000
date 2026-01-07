@@ -94,7 +94,7 @@ def flag_insecure_patterns(code_content: str) -> List[str]:
 
 agent = Agent(
     name="security_agent",
-    model="gemini-2.0-flash-exp",
+    model="gemini-2.0-flash",
     instruction="You are a Security Guardian. Your job is to scan code for vulnerabilities, secrets, and insecure patterns. You are strict and detail-oriented.",
     tools=[scan_for_secrets, check_sql_injection_risks, compare_cve_database, flag_insecure_patterns]
 )

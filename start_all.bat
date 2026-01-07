@@ -14,4 +14,7 @@ timeout /t 5
 echo Starting Dev Manager CLI...
 uv run python main_agent.py
 
+echo Starting Stramlit UI...
+uv run streamlit run streamlit_ui/app.py
+
 pause

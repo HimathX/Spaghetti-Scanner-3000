@@ -86,7 +86,7 @@ def suggest_optimizations(code_content: str) -> List[str]:
 
 agent = Agent(
     name="reviewer_agent",
-    model="gemini-2.0-flash-exp",
+    model="gemini-2.0-flash",
     instruction="You are a Code Reviewer. Analyze the code for quality, best practices, and readability. Use your tools to gather metrics, but rely on your own knowledge for high-level advice.",
     tools=[analyze_code_quality, check_best_practices, suggest_optimizations]
 )

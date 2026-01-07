@@ -51,3 +51,9 @@ Thumbs.db
 /security_agent/__pycache__
 /reviewer_agent/__pycache__
 /repo_agent/__pycache__
+# Local documentation and utility scripts
+check_health.py
+check_path.py
+project_idea.md
+project_plan.md
+README_WEB_UI.md

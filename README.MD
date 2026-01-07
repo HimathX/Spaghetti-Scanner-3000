@@ -5,8 +5,8 @@ A multi-agent AI system powered by Google's Agent Development Kit (ADK) for auto
 ## Features
 
 - 🤖 **AI-Powered Dev Manager**: Chat with an intelligent orchestrator that coordinates multiple specialized agents
-- 📊 **Sprint Status Reports**: Automatically generate reports from recent commits
-- 🔒 **Security Scanning**: Detect hardcoded secrets, SQL injection risks, and insecure patterns  
+- 📂 **GitHub Integration**: Fetch and analyze code from any public or private repository
+- 🔒 **Security Scanning**: Detect hardcoded secrets, SQL injection risks, and insecure patterns
 - 📝 **Code Review**: Analyze code quality, best practices, and potential optimizations
 - 🚀 **Streamlit UI**: Professional web interface with real-time tool call visibility
 
@@ -33,42 +33,36 @@ A multi-agent AI system powered by Google's Agent Development Kit (ADK) for auto
 
 ## Quick Start
 
-### 1. Install Dependencies
 ```bash
+# 1. Install dependencies
 uv sync
-```
 
-### 2. Start Backend Agents
-```bash
-.\start_all.bat
-```
-Or manually:
-```bash
-uv run uvicorn repo_agent.agent:app --port 8001 --reload
-uv run uvicorn security_agent.agent:app --port 8002 --reload
+# 2. Start agents (or run start_all.bat)
+uv run uvicorn repo_agent.agent:app --port 8001 --reload &
+uv run uvicorn security_agent.agent:app --port 8002 --reload &
 uv run uvicorn reviewer_agent.agent:app --port 8003 --reload
-```
 
-### 3. Launch Streamlit UI
-```bash
+# 3. Launch Streamlit UI
 uv run streamlit run streamlit_ui/app.py
+
+# OR use ADK Web UI instead (optional)
+uv run adk web --port 9000
 ```
 
-### 4. Configure Credentials
-In the sidebar, enter:
-- **Google API Key**: Your Gemini API key
-- **GitHub Token**: Personal Access Token with repo access
-- **Repository URL**: The GitHub repo to analyze
+Then configure your credentials in the sidebar:
+
+- Google API Key (Gemini)
+- GitHub Token
+- Repository URL
 
 ## Usage Examples
 
-**Generate a Sprint Report:**
-> "Generate a status report for the last 5 commits"
-
 **Analyze Specific Commit:**
+
 > "What changes were made in the last commit?"
 
 **Security Check:**
+
 > "Scan the latest commit for security vulnerabilities"
 
 ## Project Structure
